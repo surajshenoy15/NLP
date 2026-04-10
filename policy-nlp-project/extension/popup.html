@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Policy AI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 420px;
+      height: 600px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(to bottom right, #f8fafc, #f1f5f9);
+      overflow: hidden;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 24px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .header-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: bold;
+      letter-spacing: -0.5px;
+    }
+
+    .header p {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Main Content */
+    .main-content {
+      padding: 24px;
+      overflow-y: auto;
+      height: calc(100% - 120px);
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e2e8f0;
+      margin-bottom: 16px;
+    }
+
+    .label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 12px;
+    }
+
+    /* File Upload */
+    .file-upload-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .file-upload-input {
+      position: absolute;
+      left: -9999px;
+    }
+
+    .file-upload-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding: 16px;
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .file-upload-label:hover {
+      background: #f1f5f9;
+      border-color: #818cf8;
+      transform: translateY(-2px);
+    }
+
+    .file-upload-label.active {
+      border-color: #6366f1;
+      background: #eef2ff;
+    }
+
+    .file-upload-icon {
+      width: 24px;
+      height: 24px;
+      color: #94a3b8;
+    }
+
+    .file-upload-text {
+      text-align: center;
+    }
+
+    .file-upload-text .main {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #334155;
+    }
+
+    .file-upload-text .sub {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    /* Button */
+    .btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 16px;
+      background: linear-gradient(to right, #6366f1, #9333ea);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(99, 102, 241, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover:not(:disabled) {
+      box-shadow: 0 6px 12px rgba(99, 102, 241, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    /* Status */
+    .status-section {
+      margin-bottom: 16px;
+    }
+
+    .status-card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-icon.loading {
+      background: #dbeafe;
+    }
+
+    .status-icon.success {
+      background: #dcfce7;
+    }
+
+    .status-icon.error {
+      background: #fee2e2;
+    }
+
+    .status-icon.warning {
+      background: #fef3c7;
+    }
+
+    .status-text {
+      font-size: 14px;
+      font-weight: 500;
+      color: #334155;
+      flex: 1;
+    }
+
+    /* Results */
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .results-header h2 {
+      font-size: 18px;
+      font-weight: bold;
+      color: #1e293b;
+    }
+
+    .clear-btn {
+      font-size: 12px;
+      color: #64748b;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .clear-btn:hover {
+      color: #334155;
+    }
+
+    .results-list {
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    /* Result Card */
+    .result-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: slideIn 0.3s ease forwards;
+    }
+
+    @keyframes slideIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .result-card:hover {
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .result-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .clause-number {
+      font-size: 12px;
+      font-weight: bold;
+      color: #6366f1;
+      background: #eef2ff;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    .clause-type {
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .risk-badge {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid;
+    }
+
+    .risk-badge.high {
+      background: #fee2e2;
+      color: #991b1b;
+      border-color: #fecaca;
+    }
+
+    .risk-badge.medium {
+      background: #fef3c7;
+      color: #92400e;
+      border-color: #fde68a;
+    }
+
+    .risk-badge.low {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #bbf7d0;
+    }
+
+    .result-content {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .simplified-section {
+      background: linear-gradient(to right, #eef2ff, #f3e8ff);
+      border: 1px solid #e0e7ff;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #312e81;
+      margin-bottom: 4px;
+    }
+
+    .section-text {
+      font-size: 14px;
+      color: #1e293b;
+      line-height: 1.5;
+    }
+
+    .summary-section,
+    .importance-section {
+      margin-top: 4px;
+    }
+
+    .summary-text,
+    .importance-text {
+      font-size: 12px;
+      color: #475569;
+      line-height: 1.5;
+    }
+
+    .entities-section {
+      margin-top: 4px;
+    }
+
+    .entities-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 8px;
+    }
+
+    .entity-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #eef2ff;
+      color: #4338ca;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid #e0e7ff;
+    }
+
+    .entity-label {
+      color: #818cf8;
+    }
+
+    .no-entities {
+      font-size: 12px;
+      color: #94a3b8;
+      font-style: italic;
+    }
+
+    /* Scrollbar */
+    .results-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .results-list::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 10px;
+    }
+
+    .results-list::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+
+    .results-list::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .status-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #93c5fd;
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    /* Utility */
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body>
+  
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <div class="header-icon"></div>
+      <div>
+        <h1>Policy AI</h1>
+        <p>AI-powered policy analysis</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    
+    <!-- File Upload Section -->
+    <div class="card">
+      <label class="label">Upload Policy Document</label>
+      
+      <div class="file-upload-wrapper">
+        <input
+          type="file"
+          id="fileInput"
+          accept="application/pdf"
+          class="file-upload-input"
+        />
+        <label for="fileInput" id="fileLabel" class="file-upload-label">
+          <svg class="file-upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+          </svg>
+          <div class="file-upload-text">
+            <span class="main" id="fileName">Choose PDF file</span>
+            <span class="sub">or drag and drop</span>
+          </div>
+        </label>
+      </div>
+
+      <button id="analyzeBtn" class="btn">
+        <span id="btnText">Analyze Document</span>
+      </button>
+    </div>
+
+    <!-- Status Section -->
+    <div id="statusSection" class="status-section hidden">
+      <div class="status-card">
+        <div id="statusIcon" class="status-icon"></div>
+        <div class="status-text" id="status"></div>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <div id="resultsContainer" class="hidden">
+      <div class="results-header">
+        <h2>Analysis Results</h2>
+        <button id="clearBtn" class="clear-btn">Clear</button>
+      </div>
+      <div id="results" class="results-list"></div>
+    </div>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
